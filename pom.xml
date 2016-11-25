@@ -5,11 +5,11 @@
 
 	<groupId>com.github.messenger4j</groupId>
 	<artifactId>messenger4j-spring-boot-quickstart-template</artifactId>
-	<version>0.6.0</version>
+	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>${project.groupId}:${project.artifactId}</name>
-	<description>Project template for using messenger4j with Spring Boot</description>
+    <description>Application skeleton for a Messenger Chatbot using Java, Spring Boot, and messenger4j</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>com.github.messenger4j</groupId>
 			<artifactId>messenger4j</artifactId>
-			<version>0.6.0</version>
+			<version>0.6.1</version>
 		</dependency>
 	</dependencies>
 

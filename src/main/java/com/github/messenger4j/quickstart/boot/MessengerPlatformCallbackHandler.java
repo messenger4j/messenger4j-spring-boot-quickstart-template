@@ -44,8 +44,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * This is the main class for inbound and outbound communication with the Facebook Messenger Platform.
+ * The callback handler is responsible for the webhook verification and processing of the inbound messages and events.
+ * It showcases the features of the Messenger Platform.
+ *
  * @author Max Grabenhorst
- * @since 0.6.0
  */
 @RestController
 @RequestMapping("/callback")
@@ -64,6 +67,15 @@ public class MessengerPlatformCallbackHandler {
     private final MessengerReceiveClient receiveClient;
     private final MessengerSendClient sendClient;
 
+    /**
+     * Constructs the {@code MessengerPlatformCallbackHandler} and initializes the {@code MessengerReceiveClient}.
+     *
+     * @param appSecret   the {@code Application Secret} of your {@code Facebook App} (connected to your {@code Facebook
+     *                    Page})
+     * @param verifyToken the {@code Verification Token} that has been provided by you during the setup of the {@code
+     *                    Webhook}
+     * @param sendClient  the initialized {@code MessengerSendClient}
+     */
     @Autowired
     public MessengerPlatformCallbackHandler(@Value("${messenger4j.appSecret}") final String appSecret,
                                             @Value("${messenger4j.verifyToken}") final String verifyToken,
@@ -85,6 +97,12 @@ public class MessengerPlatformCallbackHandler {
         this.sendClient = sendClient;
     }
 
+    /**
+     * Webhook verification endpoint.
+     *
+     * The passed verification token (as query parameter) must match the configured verification token.
+     * In case this is true, the passed challenge string must be returned by this endpoint.
+     */
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<String> verifyWebhook(@RequestParam(HUB_MODE) final String mode,
                                                 @RequestParam(HUB_VERIFY_TOKEN) final String verifyToken,
@@ -100,6 +118,9 @@ public class MessengerPlatformCallbackHandler {
         }
     }
 
+    /**
+     * Callback endpoint responsible for processing the inbound messages and events.
+     */
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<Void> handleCallback(@RequestBody final String payload,
                                                @RequestHeader(X_HUB_SIGNATURE) final String signature) {
@@ -450,11 +471,9 @@ public class MessengerPlatformCallbackHandler {
     }
 
     /**
-     * This event is called when either the message is unsupported or when the event handler for the actual event type
-     * is not registered. In this quick start template all event handlers are registered. Hence only in case of an
+     * This handler is called when either the message is unsupported or when the event handler for the actual event type
+     * is not registered. In this showcase all event handlers are registered. Hence only in case of an
      * unsupported message the fallback event handler is called.
-     *
-     * @return a {@code FallbackEventHandler}
      */
     private FallbackEventHandler newFallbackEventHandler() {
         return event -> {
