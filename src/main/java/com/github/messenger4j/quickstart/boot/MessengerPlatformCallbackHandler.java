@@ -1,5 +1,10 @@
 package com.github.messenger4j.quickstart.boot;
 
+import static com.github.messenger4j.MessengerPlatform.CHALLENGE_REQUEST_PARAM_NAME;
+import static com.github.messenger4j.MessengerPlatform.MODE_REQUEST_PARAM_NAME;
+import static com.github.messenger4j.MessengerPlatform.SIGNATURE_HEADER_NAME;
+import static com.github.messenger4j.MessengerPlatform.VERIFY_TOKEN_REQUEST_PARAM_NAME;
+
 import com.github.messenger4j.MessengerPlatform;
 import com.github.messenger4j.exceptions.MessengerApiException;
 import com.github.messenger4j.exceptions.MessengerIOException;
@@ -54,11 +59,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/callback")
 public class MessengerPlatformCallbackHandler {
 
-    private static final String HUB_MODE = "hub.mode";
-    private static final String HUB_CHALLENGE = "hub.challenge";
-    private static final String HUB_VERIFY_TOKEN = "hub.verify_token";
-    private static final String X_HUB_SIGNATURE = "X-Hub-Signature";
-
     private static final String RESOURCE_URL =
             "https://raw.githubusercontent.com/fbsamples/messenger-platform-samples/master/node/public";
 
@@ -70,8 +70,7 @@ public class MessengerPlatformCallbackHandler {
     /**
      * Constructs the {@code MessengerPlatformCallbackHandler} and initializes the {@code MessengerReceiveClient}.
      *
-     * @param appSecret   the {@code Application Secret} of your {@code Facebook App} (connected to your {@code Facebook
-     *                    Page})
+     * @param appSecret   the {@code Application Secret}
      * @param verifyToken the {@code Verification Token} that has been provided by you during the setup of the {@code
      *                    Webhook}
      * @param sendClient  the initialized {@code MessengerSendClient}
@@ -104,9 +103,9 @@ public class MessengerPlatformCallbackHandler {
      * In case this is true, the passed challenge string must be returned by this endpoint.
      */
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<String> verifyWebhook(@RequestParam(HUB_MODE) final String mode,
-                                                @RequestParam(HUB_VERIFY_TOKEN) final String verifyToken,
-                                                @RequestParam(HUB_CHALLENGE) final String challenge) {
+    public ResponseEntity<String> verifyWebhook(@RequestParam(MODE_REQUEST_PARAM_NAME) final String mode,
+                                                @RequestParam(VERIFY_TOKEN_REQUEST_PARAM_NAME) final String verifyToken,
+                                                @RequestParam(CHALLENGE_REQUEST_PARAM_NAME) final String challenge) {
 
         logger.debug("Received Webhook verification request - mode: {} | verifyToken: {} | challenge: {}", mode,
                 verifyToken, challenge);
@@ -123,7 +122,7 @@ public class MessengerPlatformCallbackHandler {
      */
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<Void> handleCallback(@RequestBody final String payload,
-                                               @RequestHeader(X_HUB_SIGNATURE) final String signature) {
+                                               @RequestHeader(SIGNATURE_HEADER_NAME) final String signature) {
 
         logger.debug("Received Messenger Platform callback - payload: {} | signature: {}", payload, signature);
         try {
@@ -334,7 +333,8 @@ public class MessengerPlatformCallbackHandler {
     }
 
     private void sendAccountLinking(String recipientId) {
-        // will be supported in upcoming messenger4j release
+        // supported by messenger4j since 0.7.0
+        // sample implementation coming soon
     }
 
     private AttachmentMessageEventHandler newAttachmentMessageEventHandler() {

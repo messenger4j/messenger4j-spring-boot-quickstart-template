@@ -27,8 +27,7 @@ public class Application {
     /**
      * Initializes the {@code MessengerSendClient}.
      *
-     * @param pageAccessToken the generated {@code Page Access Token} of your {@code Facebook Page} (connected to your
-     *                        {@code Facebook App})
+     * @param pageAccessToken the generated {@code Page Access Token}
      */
     @Bean
     public MessengerSendClient messengerSendClient(@Value("${messenger4j.pageAccessToken}") String pageAccessToken) {
