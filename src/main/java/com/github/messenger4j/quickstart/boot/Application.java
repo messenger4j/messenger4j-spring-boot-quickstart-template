@@ -1,7 +1,6 @@
 package com.github.messenger4j.quickstart.boot;
 
-import com.github.messenger4j.MessengerPlatform;
-import com.github.messenger4j.send.MessengerSendClient;
+import com.github.messenger4j.Messenger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,15 +23,11 @@ public class Application {
 
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
-    /**
-     * Initializes the {@code MessengerSendClient}.
-     *
-     * @param pageAccessToken the generated {@code Page Access Token}
-     */
     @Bean
-    public MessengerSendClient messengerSendClient(@Value("${messenger4j.pageAccessToken}") String pageAccessToken) {
-        logger.debug("Initializing MessengerSendClient - pageAccessToken: {}", pageAccessToken);
-        return MessengerPlatform.newSendClientBuilder(pageAccessToken).build();
+    public Messenger messenger(@Value("${messenger4j.pageAccessToken}") String pageAccessToken,
+                               @Value("${messenger4j.appSecret}") final String appSecret,
+                               @Value("${messenger4j.verifyToken}") final String verifyToken) {
+        return Messenger.create(pageAccessToken, appSecret, verifyToken);
     }
 
     public static void main(String[] args) {
