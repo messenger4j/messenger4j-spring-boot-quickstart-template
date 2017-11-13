@@ -17,10 +17,12 @@ import com.github.messenger4j.exception.MessengerIOException;
 import com.github.messenger4j.exception.MessengerVerificationException;
 import com.github.messenger4j.send.MessagePayload;
 import com.github.messenger4j.send.NotificationType;
+import com.github.messenger4j.send.SenderActionPayload;
 import com.github.messenger4j.send.message.RichMediaMessage;
 import com.github.messenger4j.send.message.TextMessage;
 import com.github.messenger4j.send.message.richmedia.UrlRichMediaAsset;
 import com.github.messenger4j.send.recipient.IdRecipient;
+import com.github.messenger4j.send.senderaction.SenderAction;
 import com.github.messenger4j.userprofile.UserProfile;
 import com.github.messenger4j.webhook.event.TextMessageEvent;
 import java.net.MalformedURLException;
@@ -161,7 +163,7 @@ public class MessengerPlatformCallbackHandler {
                     case "read receipt":
                         sendReadReceipt(senderId);
                         break;
-
+                    */
                     case "typing on":
                         sendTypingOn(senderId);
                         break;
@@ -192,6 +194,10 @@ public class MessengerPlatformCallbackHandler {
 
     private void sendImageMessage(String recipientId) throws MessengerApiException, MessengerIOException, MalformedURLException {
         final UrlRichMediaAsset richMediaAsset = UrlRichMediaAsset.create(IMAGE, new URL(RESOURCE_URL + "/assets/rift.png"));
+        sendRichMediaMessage(recipientId, richMediaAsset);
+    }
+
+    private void sendRichMediaMessage(String recipientId, UrlRichMediaAsset richMediaAsset) throws MessengerApiException, MessengerIOException {
         final RichMediaMessage richMediaMessage = RichMediaMessage.create(richMediaAsset);
         final MessagePayload messagePayload = MessagePayload.create(recipientId, richMediaMessage);
         this.messenger.send(messagePayload);
@@ -200,33 +206,25 @@ public class MessengerPlatformCallbackHandler {
     private void sendGifMessage(String recipientId) throws MessengerApiException, MessengerIOException,
             MalformedURLException {
         final UrlRichMediaAsset richMediaAsset = UrlRichMediaAsset.create(IMAGE, new URL("https://media.giphy.com/media/11sBLVxNs7v6WA/giphy.gif"));
-        final RichMediaMessage richMediaMessage = RichMediaMessage.create(richMediaAsset);
-        final MessagePayload messagePayload = MessagePayload.create(recipientId, richMediaMessage);
-        this.messenger.send(messagePayload);
+        sendRichMediaMessage(recipientId, richMediaAsset);
     }
 
     private void sendAudioMessage(String recipientId) throws MessengerApiException, MessengerIOException,
             MalformedURLException {
         final UrlRichMediaAsset richMediaAsset = UrlRichMediaAsset.create(AUDIO, new URL(RESOURCE_URL + "/assets/sample.mp3"));
-        final RichMediaMessage richMediaMessage = RichMediaMessage.create(richMediaAsset);
-        final MessagePayload messagePayload = MessagePayload.create(recipientId, richMediaMessage);
-        this.messenger.send(messagePayload);
+        sendRichMediaMessage(recipientId, richMediaAsset);
     }
 
     private void sendVideoMessage(String recipientId) throws MessengerApiException, MessengerIOException,
             MalformedURLException {
         final UrlRichMediaAsset richMediaAsset = UrlRichMediaAsset.create(VIDEO, new URL(RESOURCE_URL + "/assets/allofus480.mov"));
-        final RichMediaMessage richMediaMessage = RichMediaMessage.create(richMediaAsset);
-        final MessagePayload messagePayload = MessagePayload.create(recipientId, richMediaMessage);
-        this.messenger.send(messagePayload);
+        sendRichMediaMessage(recipientId, richMediaAsset);
     }
 
     private void sendFileMessage(String recipientId) throws MessengerApiException, MessengerIOException,
             MalformedURLException {
         final UrlRichMediaAsset richMediaAsset = UrlRichMediaAsset.create(FILE, new URL(RESOURCE_URL + "/assets/test.txt"));
-        final RichMediaMessage richMediaMessage = RichMediaMessage.create(richMediaAsset);
-        final MessagePayload messagePayload = MessagePayload.create(recipientId, richMediaMessage);
-        this.messenger.send(messagePayload);
+        sendRichMediaMessage(recipientId, richMediaAsset);
     }
 
     /*
@@ -321,15 +319,15 @@ public class MessengerPlatformCallbackHandler {
     private void sendReadReceipt(String recipientId) throws MessengerApiException, MessengerIOException {
         this.messenger.sendSenderAction(recipientId, SenderAction.MARK_SEEN);
     }
-
+    */
     private void sendTypingOn(String recipientId) throws MessengerApiException, MessengerIOException {
-        this.messenger.sendSenderAction(recipientId, SenderAction.TYPING_ON);
+        this.messenger.send(SenderActionPayload.create(recipientId, SenderAction.TYPING_ON));
     }
 
     private void sendTypingOff(String recipientId) throws MessengerApiException, MessengerIOException {
-        this.messenger.sendSenderAction(recipientId, SenderAction.TYPING_OFF);
+        this.messenger.send(SenderActionPayload.create(recipientId, SenderAction.TYPING_ON));
     }
-
+    /*
     private void sendAccountLinking(String recipientId) {
         // supported by messenger4j since 0.7.0
         // sample implementation coming soon
