@@ -12,6 +12,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 import com.github.messenger4j.Messenger;
+import com.github.messenger4j.common.WebviewHeightRatio;
 import com.github.messenger4j.exception.MessengerApiException;
 import com.github.messenger4j.exception.MessengerIOException;
 import com.github.messenger4j.exception.MessengerVerificationException;
@@ -19,8 +20,14 @@ import com.github.messenger4j.send.MessagePayload;
 import com.github.messenger4j.send.NotificationType;
 import com.github.messenger4j.send.SenderActionPayload;
 import com.github.messenger4j.send.message.RichMediaMessage;
+import com.github.messenger4j.send.message.TemplateMessage;
 import com.github.messenger4j.send.message.TextMessage;
 import com.github.messenger4j.send.message.richmedia.UrlRichMediaAsset;
+import com.github.messenger4j.send.message.template.ButtonTemplate;
+import com.github.messenger4j.send.message.template.button.Button;
+import com.github.messenger4j.send.message.template.button.CallButton;
+import com.github.messenger4j.send.message.template.button.PostbackButton;
+import com.github.messenger4j.send.message.template.button.UrlButton;
 import com.github.messenger4j.send.recipient.IdRecipient;
 import com.github.messenger4j.send.senderaction.SenderAction;
 import com.github.messenger4j.userprofile.UserProfile;
@@ -28,6 +35,8 @@ import com.github.messenger4j.webhook.event.TextMessageEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,7 +117,7 @@ public class MessengerPlatformCallbackHandler {
     }
 
     private void handleTextMessageEvent(TextMessageEvent event) {
-            logger.debug("Received TextMessageEvent: {}", event);
+        logger.debug("Received TextMessageEvent: {}", event);
 
         final String messageId = event.messageId();
         final String messageText = event.text();
@@ -143,11 +152,11 @@ public class MessengerPlatformCallbackHandler {
                     case "file":
                         sendFileMessage(senderId);
                         break;
-                    /*
+
                     case "button":
                         sendButtonMessage(senderId);
                         break;
-
+                    /*
                     case "generic":
                         sendGenericMessage(senderId);
                         break;
@@ -227,18 +236,22 @@ public class MessengerPlatformCallbackHandler {
         sendRichMediaMessage(recipientId, richMediaAsset);
     }
 
-    /*
-    private void sendButtonMessage(String recipientId) throws MessengerApiException, MessengerIOException {
-        final List<Button> buttons = Button.newListBuilder()
-                .addUrlButton("Open Web URL", "https://www.oculus.com/en-us/rift/").toList()
-                .addPostbackButton("Trigger Postback", "DEVELOPER_DEFINED_PAYLOAD").toList()
-                .addCallButton("Call Phone Number", "+16505551234").toList()
-                .build();
 
-        final ButtonTemplate buttonTemplate = ButtonTemplate.newBuilder("Tap a button", buttons).build();
-        this.messenger.sendTemplate(recipientId, buttonTemplate);
+    private void sendButtonMessage(String recipientId) throws MessengerApiException, MessengerIOException, MalformedURLException {
+        final List<Button> buttons = Arrays.asList(
+                UrlButton.create("Open Web URL", new URL("https://www.oculus.com/en-us/rift/"),
+                        of(WebviewHeightRatio.COMPACT), of(false), empty()),
+                PostbackButton.create("Trigger Postback", "DEVELOPER_DEFINED_PAYLOAD"),
+                CallButton.create("Call Phone Number", "+16505551234")
+        );
+
+        final ButtonTemplate buttonTemplate = ButtonTemplate.create("Tap a button", buttons);
+        final TemplateMessage templateMessage = TemplateMessage.create(buttonTemplate);
+        final MessagePayload messagePayload = MessagePayload.create(recipientId, templateMessage);
+        this.messenger.send(messagePayload);
     }
 
+    /*
     private void sendGenericMessage(String recipientId) throws MessengerApiException, MessengerIOException {
         final List<Button> riftButtons = Button.newListBuilder()
                 .addUrlButton("Open Web URL", "https://www.oculus.com/en-us/rift/").toList()
