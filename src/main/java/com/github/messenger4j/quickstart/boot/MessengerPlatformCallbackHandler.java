@@ -25,11 +25,16 @@ import com.github.messenger4j.send.message.TextMessage;
 import com.github.messenger4j.send.message.richmedia.UrlRichMediaAsset;
 import com.github.messenger4j.send.message.template.ButtonTemplate;
 import com.github.messenger4j.send.message.template.GenericTemplate;
+import com.github.messenger4j.send.message.template.ReceiptTemplate;
 import com.github.messenger4j.send.message.template.button.Button;
 import com.github.messenger4j.send.message.template.button.CallButton;
 import com.github.messenger4j.send.message.template.button.PostbackButton;
 import com.github.messenger4j.send.message.template.button.UrlButton;
 import com.github.messenger4j.send.message.template.common.Element;
+import com.github.messenger4j.send.message.template.receipt.Address;
+import com.github.messenger4j.send.message.template.receipt.Adjustment;
+import com.github.messenger4j.send.message.template.receipt.Item;
+import com.github.messenger4j.send.message.template.receipt.Summary;
 import com.github.messenger4j.send.recipient.IdRecipient;
 import com.github.messenger4j.send.senderaction.SenderAction;
 import com.github.messenger4j.userprofile.UserProfile;
@@ -164,11 +169,11 @@ public class MessengerPlatformCallbackHandler {
                     case "generic":
                         sendGenericMessage(senderId);
                         break;
-                    /*
+
                     case "receipt":
                         sendReceiptMessage(senderId);
                         break;
-
+                    /*
                     case "quick reply":
                         sendQuickReply(senderId);
                         break;
@@ -291,56 +296,71 @@ public class MessengerPlatformCallbackHandler {
         final MessagePayload messagePayload = MessagePayload.create(recipientId, templateMessage);
         this.messenger.send(messagePayload);
     }
-    /*
-    private void sendReceiptMessage(String recipientId) throws MessengerApiException, MessengerIOException {
+
+    private void sendReceiptMessage(String recipientId) throws MessengerApiException, MessengerIOException, MalformedURLException {
         final String uniqueReceiptId = "order-" + Math.floor(Math.random() * 1000);
 
-        final ReceiptTemplate receiptTemplate = ReceiptTemplate.newBuilder("Peter Chang", uniqueReceiptId, "USD", "Visa 1234")
-                .timestamp(1428444852L)
-                .addElements()
-                    .addElement("Oculus Rift", 599.00f)
-                        .subtitle("Includes: headset, sensor, remote")
-                        .quantity(1)
-                        .currency("USD")
-                        .imageUrl(RESOURCE_URL + "/assets/riftsq.png")
-                        .toList()
-                    .addElement("Samsung Gear VR", 99.99f)
-                        .subtitle("Frost White")
-                        .quantity(1)
-                        .currency("USD")
-                        .imageUrl(RESOURCE_URL + "/assets/gearvrsq.png")
-                        .toList()
-                    .done()
-                .addAddress("1 Hacker Way", "Menlo Park", "94025", "CA", "US").done()
-                .addSummary(626.66f)
-                    .subtotal(698.99f)
-                    .shippingCost(20.00f)
-                    .totalTax(57.67f)
-                    .done()
-                .addAdjustments()
-                    .addAdjustment().name("New Customer Discount").amount(-50f).toList()
-                    .addAdjustment().name("$100 Off Coupon").amount(-100f).toList()
-                    .done()
-                .build();
+        final List<Item> items = new ArrayList<>();
 
-        this.messenger.sendTemplate(recipientId, receiptTemplate);
+        items.add(
+                Item.create(
+                        "Oculus Rift",
+                        599.00f,
+                        of("Includes: headset, sensor, remote"),
+                        of(1),
+                        of("USD"),
+                        of(new URL(RESOURCE_URL + "/assets/riftsq.png"))
+                )
+        );
+        items.add(
+                Item.create(
+                        "Samsung Gear VR",
+                        99.99f,
+                        of("Frost White"),
+                        of(1),
+                        of("USD"),
+                        of(new URL(RESOURCE_URL + "/assets/gearvrsq.png"))
+                )
+        );
+
+        final ReceiptTemplate receiptTemplate = ReceiptTemplate.create(
+                "Peter Chang",
+                uniqueReceiptId,
+                "Visa 1234",
+                "USD",
+                Summary.create(626.66f, of(698.99f), of(57.67f), of(20.00f)),
+                of(Address.create("1 Hacker Way", "Menlo Park", "94025", "CA", "US")),
+                of(items),
+                of(Arrays.asList(
+                        Adjustment.create("New Customer Discount", -50f),
+                        Adjustment.create("$100 Off Coupon", -100f)
+                )),
+                of("The Boring Company"),
+                of(new URL("https://www.boringcompany.com/")),
+                of(true),
+                of(Instant.ofEpochMilli(1428444852L))
+        );
+
+        final TemplateMessage templateMessage = TemplateMessage.create(receiptTemplate);
+        final MessagePayload messagePayload = MessagePayload.create(recipientId, templateMessage);
+        this.messenger.send(messagePayload);
     }
-
+    /*
     private void sendQuickReply(String recipientId) throws MessengerApiException, MessengerIOException {
-        final List<QuickReply> quickReplies = QuickReply.newListBuilder()
-                .addTextQuickReply("Action", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION").toList()
-                .addTextQuickReply("Comedy", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY").toList()
-                .addTextQuickReply("Drama", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA").toList()
-                .addLocationQuickReply().toList()
-                .build();
+            final List<QuickReply> quickReplies = QuickReply.newListBuilder()
+                    .addTextQuickReply("Action", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION").toList()
+                    .addTextQuickReply("Comedy", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY").toList()
+                    .addTextQuickReply("Drama", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA").toList()
+                    .addLocationQuickReply().toList()
+                    .build();
 
-        this.messenger.sendTextMessage(recipientId, "What's your favorite movie genre?", quickReplies);
-    }
+            this.messenger.sendTextMessage(recipientId, "What's your favorite movie genre?", quickReplies);
+        }
 
-    private void sendReadReceipt(String recipientId) throws MessengerApiException, MessengerIOException {
-        this.messenger.sendSenderAction(recipientId, SenderAction.MARK_SEEN);
-    }
-    */
+        private void sendReadReceipt(String recipientId) throws MessengerApiException, MessengerIOException {
+            this.messenger.sendSenderAction(recipientId, SenderAction.MARK_SEEN);
+        }
+        */
     private void sendTypingOn(String recipientId) throws MessengerApiException, MessengerIOException {
         this.messenger.send(SenderActionPayload.create(recipientId, SenderAction.TYPING_ON));
     }
