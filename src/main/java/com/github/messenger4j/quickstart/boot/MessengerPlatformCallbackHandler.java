@@ -180,11 +180,11 @@ public class MessengerPlatformCallbackHandler {
                     case "quick reply":
                         sendQuickReply(senderId);
                         break;
-                    /*
+
                     case "read receipt":
                         sendReadReceipt(senderId);
                         break;
-                    */
+
                     case "typing on":
                         sendTypingOn(senderId);
                         break;
@@ -360,11 +360,11 @@ public class MessengerPlatformCallbackHandler {
         TextMessage message = TextMessage.create("What's your favorite movie genre?", of(quickReplies), empty());
         messenger.send(MessagePayload.create(recipientId, message));
     }
-    /*
-        private void sendReadReceipt(String recipientId) throws MessengerApiException, MessengerIOException {
-            this.messenger.sendSenderAction(recipientId, SenderAction.MARK_SEEN);
-        }
-    */
+
+    private void sendReadReceipt(String recipientId) throws MessengerApiException, MessengerIOException {
+        this.messenger.send(SenderActionPayload.create(recipientId, SenderAction.MARK_SEEN));
+    }
+
     private void sendTypingOn(String recipientId) throws MessengerApiException, MessengerIOException {
         this.messenger.send(SenderActionPayload.create(recipientId, SenderAction.TYPING_ON));
     }
