@@ -24,10 +24,12 @@ import com.github.messenger4j.send.message.TemplateMessage;
 import com.github.messenger4j.send.message.TextMessage;
 import com.github.messenger4j.send.message.richmedia.UrlRichMediaAsset;
 import com.github.messenger4j.send.message.template.ButtonTemplate;
+import com.github.messenger4j.send.message.template.GenericTemplate;
 import com.github.messenger4j.send.message.template.button.Button;
 import com.github.messenger4j.send.message.template.button.CallButton;
 import com.github.messenger4j.send.message.template.button.PostbackButton;
 import com.github.messenger4j.send.message.template.button.UrlButton;
+import com.github.messenger4j.send.message.template.common.Element;
 import com.github.messenger4j.send.recipient.IdRecipient;
 import com.github.messenger4j.send.senderaction.SenderAction;
 import com.github.messenger4j.userprofile.UserProfile;
@@ -35,8 +37,10 @@ import com.github.messenger4j.webhook.event.TextMessageEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,11 +160,11 @@ public class MessengerPlatformCallbackHandler {
                     case "button":
                         sendButtonMessage(senderId);
                         break;
-                    /*
+
                     case "generic":
                         sendGenericMessage(senderId);
                         break;
-
+                    /*
                     case "receipt":
                         sendReceiptMessage(senderId);
                         break;
@@ -251,39 +255,43 @@ public class MessengerPlatformCallbackHandler {
         this.messenger.send(messagePayload);
     }
 
-    /*
-    private void sendGenericMessage(String recipientId) throws MessengerApiException, MessengerIOException {
-        final List<Button> riftButtons = Button.newListBuilder()
-                .addUrlButton("Open Web URL", "https://www.oculus.com/en-us/rift/").toList()
-                .addPostbackButton("Call Postback", "Payload for first bubble").toList()
-                .build();
 
-        final List<Button> touchButtons = Button.newListBuilder()
-                .addUrlButton("Open Web URL", "https://www.oculus.com/en-us/touch/").toList()
-                .addPostbackButton("Call Postback", "Payload for second bubble").toList()
-                .build();
+    private void sendGenericMessage(String recipientId) throws MessengerApiException, MessengerIOException, MalformedURLException {
+        List<Button> riftButtons = new ArrayList<>();
+        riftButtons.add(UrlButton.create("Open Web URL", new URL("https://www.oculus.com/en-us/rift/")));
+        riftButtons.add(PostbackButton.create("Call Postback", "Payload for first bubble"));
 
+        List<Button> touchButtons = new ArrayList<>();
+        touchButtons.add(UrlButton.create("Open Web URL", new URL("https://www.oculus.com/en-us/touch/")));
+        touchButtons.add(PostbackButton.create("Call Postback", "Payload for second bubble"));
 
-        final GenericTemplate genericTemplate = GenericTemplate.newBuilder()
-                .addElements()
-                    .addElement("rift")
-                        .subtitle("Next-generation virtual reality")
-                        .itemUrl("https://www.oculus.com/en-us/rift/")
-                        .imageUrl(RESOURCE_URL + "/assets/rift.png")
-                        .buttons(riftButtons)
-                        .toList()
-                    .addElement("touch")
-                        .subtitle("Your Hands, Now in VR")
-                        .itemUrl("https://www.oculus.com/en-us/touch/")
-                        .imageUrl(RESOURCE_URL + "/assets/touch.png")
-                        .buttons(touchButtons)
-                        .toList()
-                    .done()
-                .build();
+        final List<Element> elements = new ArrayList<>();
 
-        this.messenger.sendTemplate(recipientId, genericTemplate);
+        elements.add(
+                Element.create(
+                        "rift",
+                        of("Next-generation virtual reality"),
+                        of(new URL("https://www.oculus.com/en-us/rift/")),
+                        empty(),
+                        of(riftButtons)
+                )
+        );
+        elements.add(
+                Element.create(
+                        "touch",
+                        of("Your Hands, Now in VR"),
+                        of(new URL("https://www.oculus.com/en-us/touch/")),
+                        empty(),
+                        of(touchButtons)
+                )
+        );
+
+        final GenericTemplate genericTemplate = GenericTemplate.create(elements);
+        final TemplateMessage templateMessage = TemplateMessage.create(genericTemplate);
+        final MessagePayload messagePayload = MessagePayload.create(recipientId, templateMessage);
+        this.messenger.send(messagePayload);
     }
-
+    /*
     private void sendReceiptMessage(String recipientId) throws MessengerApiException, MessengerIOException {
         final String uniqueReceiptId = "order-" + Math.floor(Math.random() * 1000);
 
