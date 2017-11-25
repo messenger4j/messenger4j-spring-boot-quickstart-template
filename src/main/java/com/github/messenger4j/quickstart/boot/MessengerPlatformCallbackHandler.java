@@ -22,6 +22,9 @@ import com.github.messenger4j.send.SenderActionPayload;
 import com.github.messenger4j.send.message.RichMediaMessage;
 import com.github.messenger4j.send.message.TemplateMessage;
 import com.github.messenger4j.send.message.TextMessage;
+import com.github.messenger4j.send.message.quickreply.LocationQuickReply;
+import com.github.messenger4j.send.message.quickreply.QuickReply;
+import com.github.messenger4j.send.message.quickreply.TextQuickReply;
 import com.github.messenger4j.send.message.richmedia.UrlRichMediaAsset;
 import com.github.messenger4j.send.message.template.ButtonTemplate;
 import com.github.messenger4j.send.message.template.GenericTemplate;
@@ -173,11 +176,11 @@ public class MessengerPlatformCallbackHandler {
                     case "receipt":
                         sendReceiptMessage(senderId);
                         break;
-                    /*
+
                     case "quick reply":
                         sendQuickReply(senderId);
                         break;
-
+                    /*
                     case "read receipt":
                         sendReadReceipt(senderId);
                         break;
@@ -345,22 +348,23 @@ public class MessengerPlatformCallbackHandler {
         final MessagePayload messagePayload = MessagePayload.create(recipientId, templateMessage);
         this.messenger.send(messagePayload);
     }
-    /*
+
     private void sendQuickReply(String recipientId) throws MessengerApiException, MessengerIOException {
-            final List<QuickReply> quickReplies = QuickReply.newListBuilder()
-                    .addTextQuickReply("Action", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION").toList()
-                    .addTextQuickReply("Comedy", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY").toList()
-                    .addTextQuickReply("Drama", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA").toList()
-                    .addLocationQuickReply().toList()
-                    .build();
+        List<QuickReply> quickReplies = new ArrayList<>();
 
-            this.messenger.sendTextMessage(recipientId, "What's your favorite movie genre?", quickReplies);
-        }
+        quickReplies.add(TextQuickReply.create("Action", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_ACTION"));
+        quickReplies.add(TextQuickReply.create("Comedy", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_COMEDY"));
+        quickReplies.add(TextQuickReply.create("Drama", "DEVELOPER_DEFINED_PAYLOAD_FOR_PICKING_DRAMA"));
+        quickReplies.add(LocationQuickReply.create());
 
+        TextMessage message = TextMessage.create("What's your favorite movie genre?", of(quickReplies), empty());
+        messenger.send(MessagePayload.create(recipientId, message));
+    }
+    /*
         private void sendReadReceipt(String recipientId) throws MessengerApiException, MessengerIOException {
             this.messenger.sendSenderAction(recipientId, SenderAction.MARK_SEEN);
         }
-        */
+    */
     private void sendTypingOn(String recipientId) throws MessengerApiException, MessengerIOException {
         this.messenger.send(SenderActionPayload.create(recipientId, SenderAction.TYPING_ON));
     }
