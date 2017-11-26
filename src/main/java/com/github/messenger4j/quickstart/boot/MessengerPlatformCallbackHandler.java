@@ -28,6 +28,7 @@ import com.github.messenger4j.send.message.quickreply.TextQuickReply;
 import com.github.messenger4j.send.message.richmedia.UrlRichMediaAsset;
 import com.github.messenger4j.send.message.template.ButtonTemplate;
 import com.github.messenger4j.send.message.template.GenericTemplate;
+import com.github.messenger4j.send.message.template.ListTemplate;
 import com.github.messenger4j.send.message.template.ReceiptTemplate;
 import com.github.messenger4j.send.message.template.button.Button;
 import com.github.messenger4j.send.message.template.button.CallButton;
@@ -173,6 +174,10 @@ public class MessengerPlatformCallbackHandler {
                         sendGenericMessage(senderId);
                         break;
 
+                    case "list":
+                        sendListMessageMessage(senderId);
+                        break;
+
                     case "receipt":
                         sendReceiptMessage(senderId);
                         break;
@@ -296,6 +301,40 @@ public class MessengerPlatformCallbackHandler {
 
         final GenericTemplate genericTemplate = GenericTemplate.create(elements);
         final TemplateMessage templateMessage = TemplateMessage.create(genericTemplate);
+        final MessagePayload messagePayload = MessagePayload.create(recipientId, templateMessage);
+        this.messenger.send(messagePayload);
+    }
+
+    private void sendListMessageMessage(String recipientId) throws MessengerApiException, MessengerIOException, MalformedURLException {
+        List<Button> riftButtons = new ArrayList<>();
+        riftButtons.add(UrlButton.create("Open Web URL", new URL("https://www.oculus.com/en-us/rift/")));
+
+        List<Button> touchButtons = new ArrayList<>();
+        touchButtons.add(UrlButton.create("Open Web URL", new URL("https://www.oculus.com/en-us/touch/")));
+
+        final List<Element> elements = new ArrayList<>();
+
+        elements.add(
+                Element.create(
+                        "rift",
+                        of("Next-generation virtual reality"),
+                        of(new URL("https://www.oculus.com/en-us/rift/")),
+                        empty(),
+                        of(riftButtons)
+                )
+        );
+        elements.add(
+                Element.create(
+                        "touch",
+                        of("Your Hands, Now in VR"),
+                        of(new URL("https://www.oculus.com/en-us/touch/")),
+                        empty(),
+                        of(touchButtons)
+                )
+        );
+
+        final ListTemplate listTemplate = ListTemplate.create(elements);
+        final TemplateMessage templateMessage = TemplateMessage.create(listTemplate);
         final MessagePayload messagePayload = MessagePayload.create(recipientId, templateMessage);
         this.messenger.send(messagePayload);
     }
