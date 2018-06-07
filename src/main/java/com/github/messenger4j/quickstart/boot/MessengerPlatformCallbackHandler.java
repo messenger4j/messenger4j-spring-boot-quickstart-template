@@ -359,9 +359,9 @@ public class MessengerPlatformCallbackHandler {
 
 	private void handleAttachmentMessageEvent(AttachmentMessageEvent event) {
 		logger.debug("Handling QuickReplyMessageEvent");
+		final String senderId = event.senderId();
+		logger.debug("senderId: {}", senderId);
 		for (Attachment attachment : event.attachments()) {
-			final String senderId = event.senderId();
-			logger.debug("senderId: {}", senderId);
 			if (attachment.isRichMediaAttachment()) {
 				final RichMediaAttachment richMediaAttachment = attachment.asRichMediaAttachment();
 				final RichMediaAttachment.Type type = richMediaAttachment.type();
